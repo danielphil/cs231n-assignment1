@@ -103,14 +103,10 @@ def svm_loss_vectorized(W, X, y, reg):
   scaledX = dWCount * X
 
   for i in range(num_train):
-    for j in range(num_classes):
-      if margin[i, j] <= 0:
-        continue
-
-      if y[i] == j:
-        continue
-
-      dW[:, j] += X[i]
+    row = margin[i, :]
+    classes_to_increment = np.nonzero(row)
+    for c in classes_to_increment[0]:
+      dW[:, c] += X[i]
     dW[:, y[i]] -= scaledX[i]
 
   loss += np.sum(margin)
