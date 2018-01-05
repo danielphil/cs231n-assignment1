@@ -73,7 +73,40 @@ def softmax_loss_vectorized(W, X, y, reg):
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
-  pass
+  num_train = X.shape[0]
+  loss = 0.0
+
+  # get the scores for all examples and scale by the maximum score for each example
+  scores = X.dot(W)
+  m = np.max(scores, axis=1)
+  m = m.reshape(m.shape[0], 1)
+  scores -= m
+
+  # get probabilities for each class
+  score_per_class = np.sum(np.exp(scores), axis=1)
+  score_per_class = score_per_class.reshape(score_per_class.shape[0], 1)
+  p = np.exp(scores) / score_per_class
+
+  # get the probabilities of the correct class for each example
+  correct_p = p[range(p.shape[0]), y]
+  # calculate the loss for each example
+  loss_per_example = np.log(correct_p) * -1
+  # sum to get the total loss
+  loss = np.sum(loss_per_example)
+
+  # p - 1 for the correct classes
+  p[range(p.shape[0]), y] -= 1
+
+  # scale input images by probabilities and sum over all examples
+  # to get the weights
+  dW = X.T.dot(p)
+
+  loss /= num_train
+  dW /= num_train
+
+  # apply regularization
+  loss += reg * np.sum(W * W)
+  dW += reg * W * 2
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
